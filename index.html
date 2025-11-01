@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter Battle Online</title>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<h1>Letter Battle Online</h1>
+<div>
+    <input id="answer" placeholder="Введите ответ" />
+    <button id="sendBtn">Отправить</button>
+</div>
+<ul id="answers"></ul>
+
+<script>
+const socket = io();
+
+document.getElementById('sendBtn').addEventListener('click', () => {
+    const answer = document.getElementById('answer').value;
+    socket.emit('answer', answer);
+    document.getElementById('answer').value = '';
+});
+
+socket.on('new-answer', (data) => {
+    const li = document.createElement('li');
+    li.textContent = data;
+    document.getElementById('answers').appendChild(li);
+});
+</script>
+</body>
+</html>
