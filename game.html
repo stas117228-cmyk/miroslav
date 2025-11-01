@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        img-src 'self' https:;
+        script-src 'self' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+    ">
+
     <meta charset="UTF-8">
     <title>Игра</title>
     <link rel="stylesheet" href="style.css">
@@ -30,7 +39,7 @@ socket.on('updatePlayers', (players) => {
 });
 
 socket.on('newQuestion', ({ round, question }) => {
-    document.getElementById('question').innerHTML = Раунд ${round}: ${question};
+    document.getElementById('question').innerHTML = 'Раунд ' + round + ': ' + question;
 });
 
 document.getElementById('sendBtn').onclick = () => {
@@ -45,7 +54,7 @@ document.getElementById('nextBtn').onclick = () => {
 };
 
 socket.on('gameOver', (winner) => {
-    alert(`Игра окончена! Победитель: ${winner.nickname} с ${winner.score} букв.`);
+    alert('Игра окончена! Победитель: ' + winner.nickname + ' с ' + winner.score + ' букв.');
     window.location.href = '/';
 });
 </script>
