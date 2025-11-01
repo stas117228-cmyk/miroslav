@@ -1,4 +1,4 @@
-const express = require('express');
+ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
@@ -8,7 +8,6 @@ const io = new Server(server);
 
 app.use(express.static(__dirname));
 
-// Простые вопросы для теста
 const questions = [
   { q: "Столица Франции?", a: ["париж"] },
   { q: "5 + 7 = ?", a: ["12"] },
@@ -17,14 +16,17 @@ const questions = [
 
 const rooms = {};
 
+console.log('Server запущен, ждём подключений...');
+
 io.on('connection', socket => {
-    console.log('Новый игрок подключился:', socket.id);
+    console.log('Новый сокет подключился:', socket.id);
 
     socket.on('joinRoom', ({ nickname, roomId }) => {
-        console.log(`${nickname} пытается войти в комнату ${roomId}`);
-        if (!rooms[roomId]) rooms[roomId] = { players: [], round: 0, currentQuestion: null, timer: null, timeLeft: 20 };
+        console.log('joinRoom получен:', nickname, roomId);
 
+        if (!rooms[roomId]) rooms[roomId] = { players: [], round: 0, currentQuestion: null, timer: null, timeLeft: 20 };
         const room = rooms[roomId];
+
         if (room.players.length >= 6) { socket.emit('roomFull'); return; }
 
         room.players.push({ id: socket.id, nickname, score: 0 });
@@ -38,12 +40,15 @@ io.on('connection', socket => {
     socket.on('answer', ({ roomId, answer }) => {
         const room = rooms[roomId];
         if (!room || !room.currentQuestion) return;
+
         const isCorrect = room.currentQuestion.a.includes(answer.toLowerCase());
         socket.emit(isCorrect ? 'correctAnswer' : 'wrongAnswer');
+
         if (isCorrect) {
             const player = room.players.find(p => p.id === socket.id);
             if (player) player.score += answer.length;
         }
+
         io.to(roomId).emit('updateScores', room.players);
     });
 
