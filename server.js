@@ -59,6 +59,8 @@ io.on('connection', socket => {
         socket.emit(isCorrect ? 'correctAnswer' : 'wrongAnswer');
     });
 
+    socket.on('nextRound', ({ roomId }) => startRound(roomId));
+
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const room = rooms[roomId];
@@ -121,8 +123,6 @@ function endRound(roomId) {
         io.to(roomId).emit('gameOver', winner);
         if (room.timer) clearInterval(room.timer);
         delete rooms[roomId];
-    } else {
-        startRound(roomId);
     }
 }
 
