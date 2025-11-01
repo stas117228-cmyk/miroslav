@@ -1,6 +1,7 @@
 import { allQuestions } from './questions.js';
 
 const ws = new WebSocket(`ws://${window.location.host}`);
+
 const loginDiv = document.getElementById('login');
 const lobbyDiv = document.getElementById('lobby');
 const gameDiv = document.getElementById('game');
@@ -15,6 +16,7 @@ const timerEl = document.getElementById('timer');
 const playerList = document.getElementById('playerList');
 const leadersEl = document.getElementById('leaders');
 const finalResultsEl = document.getElementById('finalResults');
+const questionImage = document.getElementById('questionImage');
 
 let nick = '';
 let timeLeft = 30;
@@ -47,9 +49,15 @@ ws.onmessage = (msg) => {
   }
 
   if (data.type === 'newQuestion') {
-    gameDiv.style.display = 'flex';
     lobbyDiv.style.display = 'none';
-    questionEl.textContent = data.question;
+    gameDiv.style.display = 'flex';
+    questionEl.textContent = data.question.text || data.question;
+    if (data.question.image) {
+      questionImage.src = images/${data.question.image};
+      questionImage.style.display = 'block';
+    } else {
+      questionImage.style.display = 'none';
+    }
     answerInput.value = '';
     answerInput.disabled = false;
     answerInput.className = '';
