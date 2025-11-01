@@ -1,0 +1,12 @@
+﻿{
+  "name": "letter-battle-online",
+  "version": "1.0.0",
+  "description": "Letter Battle game online",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
