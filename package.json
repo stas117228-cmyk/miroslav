@@ -1,7 +1,6 @@
 {
   "name": "quiz-game",
   "version": "1.0.0",
-  "description": "Онлайн викторина 3-6 игроков",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
