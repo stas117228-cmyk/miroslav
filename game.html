@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Content Security Policy с разрешением inline-скриптов -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-        img-src 'self' https:;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        font-src 'self' https://fonts.gstatic.com;
-    ">
-
-    <meta charset="UTF-8">
-    <title>Игра</title>
-    <link rel="stylesheet" href="style.css">
+<meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    img-src 'self' https:;
+    style-src 'self' 'unsafe-inline';
+    font-src 'self';
+">
+<meta charset="UTF-8">
+<title>Игра</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
     <h1>Викторина</h1>
-    <div id="players"></div>
-    <div id="question"></div>
+    <div id="players">Игроки: </div>
+    <div id="question">Вопрос будет здесь</div>
 
     <label for="answer">Ваш ответ:</label>
     <input type="text" id="answer" name="answer" placeholder="Ваш ответ">
@@ -36,27 +34,22 @@ const roomId = localStorage.getItem('roomId');
 socket.emit('joinRoom', { nickname, roomId });
 
 socket.on('roomFull', () => alert('Комната заполнена'));
-
-socket.on('updatePlayers', (players) => {
+socket.on('updatePlayers', players => {
     document.getElementById('players').innerHTML = 'Игроки: ' + players.join(', ');
 });
-
 socket.on('newQuestion', ({ round, question }) => {
     document.getElementById('question').innerHTML = 'Раунд ' + round + ': ' + question;
 });
-
 document.getElementById('sendBtn').onclick = () => {
     const answer = document.getElementById('answer').value.trim();
     if(!answer) return;
     socket.emit('answer', { roomId, answer });
     document.getElementById('answer').value = '';
 };
-
 document.getElementById('nextBtn').onclick = () => {
     socket.emit('nextRound', roomId);
 };
-
-socket.on('gameOver', (winner) => {
+socket.on('gameOver', winner => {
     alert('Игра окончена! Победитель: ' + winner.nickname + ' с ' + winner.score + ' букв.');
     window.location.href = '/';
 });
