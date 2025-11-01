@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Letter Battle Online</title>
+<script src='/socket.io/socket.io.js'></script>
+<script src='client.js' defer></script>
+<style>
+body { font-family: Arial; text-align: center; margin-top: 50px; }
+#question { font-size: 24px; margin-bottom: 20px; }
+input { font-size: 18px; padding: 5px; }
+button { font-size: 18px; padding: 5px 10px; }
+#messages { margin-top: 20px; }
+</style>
+</head>
+<body>
+<h1>Letter Battle Online</h1>
+<div>
+    <input id='nameInput' placeholder='Your Name'>
+    <button id='joinBtn'>Join Game</button>
+</div>
+<div id='game' style='display:none;'>
+    <div id='question'></div>
+    <input id='answerInput' placeholder='Your Answer'>
+    <button id='sendBtn'>Send</button>
+    <div id='round'></div>
+    <div id='messages'></div>
+</div>
+</body>
+</html>
