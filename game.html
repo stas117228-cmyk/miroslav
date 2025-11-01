@@ -7,7 +7,7 @@
     style-src 'self' 'unsafe-inline';
 ">
 <meta charset="UTF-8">
-<title>Игра</title>
+<title>Викторина</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,7 +25,6 @@
     <canvas id="scoreChart" width="600" height="300"></canvas>
 </div>
 
-<!-- Подключаем Socket.io и Chart.js -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -36,84 +35,53 @@ const roomId = localStorage.getItem('roomId');
 
 socket.emit('joinRoom', { nickname, roomId });
 
-// ======== Глобальные переменные ========
 let scoreChart;
 
-// ======== Функции для графика ========
 function createChart(players) {
     const ctx = document.getElementById('scoreChart').getContext('2d');
-    const labels = players.map(p => p.nickname);
-    const data = players.map(p => p.score);
-
     scoreChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: players.map(p => p.nickname),
             datasets: [{
                 label: 'Очки (буквы)',
-                data: data,
+                data: players.map(p => p.score),
                 backgroundColor: 'purple'
             }]
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            }
-        }
+        options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
     });
 }
 
 function updateChart(players) {
-    if (!scoreChart) {
-        createChart(players);
-    } else {
+    if (!scoreChart) createChart(players);
+    else {
         scoreChart.data.labels = players.map(p => p.nickname);
         scoreChart.data.datasets[0].data = players.map(p => p.score);
         scoreChart.update();
     }
 }
 
-// ======== Socket.io события ========
 socket.on('roomFull', () => alert('Комната заполнена'));
-
-socket.on('updatePlayers', players => {
-    document.getElementById('players').innerText = 'Игроки: ' + players.join(', ');
-});
-
-socket.on('timer', time => {
-    document.getElementById('timer').innerText = Осталось: ${time}s;
-});
-
+socket.on('updatePlayers', players => document.getElementById('players').innerText = 'Игроки: ' + players.join(', '));
+socket.on('timer', time => document.getElementById('timer').innerText = `Осталось: ${time}s`);
 socket.on('newQuestion', ({ round, question }) => {
     document.getElementById('question').innerText = Раунд ${round}: ${question};
     document.getElementById('answer').value = '';
 });
-
 socket.on('wrongAnswer', () => alert('Неправильный ответ! Попробуйте снова.'));
 socket.on('correctAnswer', () => alert('Правильный ответ!'));
-
 socket.on('roundOver', results => {
     let text = 'Раунд завершён! Ответы игроков:\n';
-    results.forEach(r => {
-        text += ${r.nickname}: ${r.answer} ${r.correct ? '(правильно)' : '(неправильно)'}\n;
-    });
+    results.forEach(r => text += `${r.nickname}: ${r.answer} ${r.correct ? '(правильно)' : '(неправильно)'}\n`);
     alert(text);
-
-    // Обновляем график после окончания раунда
-    updateChart(results.map(r => ({ nickname: r.nickname, score: r.correct ? r.answer.length : 0 })));
 });
-
+socket.on('updateScores', players => updateChart(players));
 socket.on('gameOver', winner => {
     alert('Игра окончена! Победитель: ' + winner.nickname + ' с ' + winner.score + ' букв.');
     window.location.href = '/';
 });
 
-// ======== Отправка ответа ========
 document.getElementById('sendBtn').onclick = () => {
     const answer = document.getElementById('answer').value.trim();
     if (!answer) return;
