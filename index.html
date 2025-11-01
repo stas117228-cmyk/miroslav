@@ -1,41 +1,27 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-    img-src 'self' https:;
-    style-src 'self' 'unsafe-inline';
-    font-src 'self';
-">
 <meta charset="UTF-8">
-<title>Викторина Онлайн</title>
+<title>Вход в игру</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
-    <h1>Викторина Онлайн</h1>
-
-    <label for="nickname">Ник:</label>
-    <input type="text" id="nickname" name="nickname" placeholder="Введите ник">
-
-    <label for="roomId">Комната:</label>
-    <input type="text" id="roomId" name="roomId" placeholder="Введите комнату">
-
-    <button id="joinBtn">Войти</button>
+    <h1>Вход в викторину</h1>
+    <div class="form-group">
+        <input type="text" id="nickname" name="nickname" placeholder="Ваш ник">
+        <input type="text" id="roomId" name="roomId" placeholder="Название комнаты">
+        <button id="joinBtn">Войти</button>
+    </div>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
 <script>
 document.getElementById('joinBtn').onclick = () => {
     const nickname = document.getElementById('nickname').value.trim();
     const roomId = document.getElementById('roomId').value.trim();
-
     if (!nickname || !roomId) return alert('Введите ник и комнату');
-
     localStorage.setItem('nickname', nickname);
     localStorage.setItem('roomId', roomId);
-
     window.location.href = 'game.html';
 };
 </script>
