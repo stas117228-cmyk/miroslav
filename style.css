@@ -1,32 +1,85 @@
+/* Общий фон и контейнер */
 body {
-    background-color: #2e004f;
-    color: #ffffff;
+    margin: 0;
     font-family: Arial, sans-serif;
-    text-align: center;
+    background-color: #1a0b2b; /* темно-фиолетовый фон */
+    color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 30px;
 }
 
 .container {
-    max-width: 600px;
-    margin: 50px auto;
-    background-color: #3b0066;
+    width: 90%;
+    max-width: 800px;
+    background-color: #2a1a4a; /* чуть светлее для контраста */
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px #000000;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-input, button {
+/* Заголовки */
+h1, h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #e0cfff;
+}
+
+/* Список игроков и таймер */
+#players, #timer {
+    font-size: 18px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+/* Вопрос */
+#question {
+    font-size: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* Поля ввода и кнопка */
+input[type="text"] {
+    width: 70%;
     padding: 10px;
-    margin: 5px;
-    border-radius: 5px;
+    border-radius: 8px;
     border: none;
+    font-size: 16px;
+    margin-right: 10px;
 }
 
 button {
-    background-color: #6a00b0;
-    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
     cursor: pointer;
+    background-color: #8a2be2; /* ярко-фиолетовая кнопка */
+    color: #fff;
+    transition: 0.3s;
 }
 
 button:hover {
-    background-color: #8a00ff;
+    background-color: #b451f2;
+}
+
+/* График */
+canvas {
+    margin-top: 20px;
+    background-color: #3b1f5a; /* фон под графиком */
+    border-radius: 12px;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    input[type="text"] {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    button {
+        width: 100%;
+    }
 }
