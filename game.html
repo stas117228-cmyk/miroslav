@@ -2,11 +2,6 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-    style-src 'self' 'unsafe-inline';
-">
 <title>Викторина</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -16,15 +11,37 @@
     <div id="players">Игроки: </div>
     <div id="timer">Осталось: 20s</div>
     <div id="question">Вопрос будет здесь</div>
-    <input type="text" id="answer" name="answer" placeholder="Ваш ответ">
+    <input type="text" id="answer" placeholder="Ваш ответ">
     <button id="sendBtn">Ответить</button>
     <button id="nextRoundBtn" style="display:none;">Следующий раунд</button>
-    <h2>Счёт игроков</h2>
-    <canvas id="scoreChart" width="600" height="300"></canvas>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="game.js"></script>
+<script>
+const socket = io();
+const nickname = localStorage.getItem('nickname');
+const roomId = localStorage.getItem('roomId');
+
+socket.emit('joinRoom', { nickname, roomId });
+
+socket.on('updatePlayers', players => document.getElementById('players').innerText = 'Игроки: ' + players.join(', '));
+socket.on('timer', time => document.getElementById('timer').innerText = 'Осталось: ' + time + 's');
+socket.on('newQuestion', ({ round, question }) => {
+    document.getElementById('question').innerText = Раунд ${round}: ${question};
+    document.getElementById('answer').value = '';
+});
+socket.on('wrongAnswer', () => alert('Неправильный ответ!'));
+socket.on('correctAnswer', () => alert('Правильный ответ!'));
+socket.on('roundOver', () => document.getElementById('nextRoundBtn').style.display='inline-block');
+
+document.getElementById('sendBtn').onclick = () => {
+    const ans = document.getElementById('answer').value.trim();
+    if(ans) socket.emit('answer', { roomId, answer: ans });
+};
+document.getElementById('nextRoundBtn').onclick = () => {
+    document.getElementById('nextRoundBtn').style.display='none';
+    socket.emit('nextRound', { roomId });
+};
+</script>
 </body>
 </html>
