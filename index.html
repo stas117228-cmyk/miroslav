@@ -17,8 +17,14 @@
 <body>
 <div class="container">
     <h1>Викторина Онлайн</h1>
-    <input type="text" id="nickname" placeholder="Введите ник">
-    <input type="text" id="roomId" placeholder="Введите комнату">
+
+    <!-- Добавлены name и id для автозаполнения -->
+    <label for="nickname">Ник:</label>
+    <input type="text" id="nickname" name="nickname" placeholder="Введите ник">
+
+    <label for="roomId">Комната:</label>
+    <input type="text" id="roomId" name="roomId" placeholder="Введите комнату">
+
     <button id="joinBtn">Войти</button>
 </div>
 
