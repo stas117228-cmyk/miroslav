@@ -36,21 +36,29 @@ io.on('connection', socket => {
     console.log('Новый игрок подключился');
 
     socket.on('joinRoom', ({ nickname, roomId }) => {
-        if (!rooms[roomId]) rooms[roomId] = [];
-        if (rooms[roomId].length >= 6) {
+        if (!rooms[roomId]) rooms[roomId] = { players: [], currentQuestion: null, answers: {}, round: 1, timer: null, timeLeft: 20 };
+        const room = rooms[roomId];
+
+        if (room.players.length >= 6) {
             socket.emit('roomFull');
             return;
         }
 
-        rooms[roomId].push({ id: socket.id, nickname, score: 0, round: 1 });
+        room.players.push({ id: socket.id, nickname, score: 0 });
         socket.join(roomId);
 
-        // Отправляем список игроков
-        const players = rooms[roomId].map(p => p.nickname);
-        io.to(roomId).emit('updatePlayers', players);
+        // Отправляем список игроков всем
+        const playerNames = room.players.map(p => p.nickname);
+        io.to(roomId).emit('updatePlayers', playerNames);
 
-        // Запускаем первый раунд
-        startRound(roomId);
+        // Если вопрос уже идёт, отправляем текущий вопрос новому игроку
+        if (room.currentQuestion) {
+            socket.emit('newQuestion', { round: room.round, question: room.currentQuestion.q });
+            socket.emit('timer', room.timeLeft);
+        } else {
+            // Иначе запускаем первый раунд
+            startRound(roomId);
+        }
     });
 
     socket.on('answer', ({ roomId, answer }) => {
@@ -66,14 +74,16 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('nextRound', roomId => {
-        startRound(roomId);
-    });
-
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
-            rooms[roomId] = rooms[roomId].filter(p => p.id !== socket.id);
-            if (rooms[roomId].length === 0) delete rooms[roomId];
+            const room = rooms[roomId];
+            room.players = room.players.filter(p => p.id !== socket.id);
+            const playerNames = room.players.map(p => p.nickname);
+            io.to(roomId).emit('updatePlayers', playerNames);
+            if (room.players.length === 0) {
+                if (room.timer) clearInterval(room.timer);
+                delete rooms[roomId];
+            }
         }
     });
 });
@@ -85,44 +95,52 @@ function startRound(roomId) {
     const question = getRandomQuestion();
     room.currentQuestion = question;
     room.answers = {};
+    room.timeLeft = 20;
 
-    const round = room[0].round;
-    io.to(roomId).emit('newQuestion', { round, question: question.q });
+    io.to(roomId).emit('newQuestion', { round: room.round, question: question.q });
+    io.to(roomId).emit('timer', room.timeLeft);
 
-    let timeLeft = 20;
-    io.to(roomId).emit('timer', timeLeft);
-    const timerInterval = setInterval(() => {
-        timeLeft--;
-        io.to(roomId).emit('timer', timeLeft);
-        if (timeLeft <= 0) clearInterval(timerInterval);
-    }, 1000);
+    if (room.timer) clearInterval(room.timer);
 
-    setTimeout(() => {
-        clearInterval(timerInterval);
+    room.timer = setInterval(() => {
+        room.timeLeft--;
+        io.to(roomId).emit('timer', room.timeLeft);
 
-        const results = room.map(p => ({
-            nickname: p.nickname,
-            answer: room.answers[p.id] || '-',
-            correct: room.answers[p.id] ? question.a.includes(room.answers[p.id].toLowerCase()) : false
-        }));
-
-        results.forEach(r => {
-            if (r.correct) {
-                const player = room.find(p => p.nickname === r.nickname);
-                if (player) player.score += r.answer.length;
-            }
-        });
-
-        io.to(roomId).emit('roundOver', results);
-
-        // Подготовка к следующему раунду
-        room.forEach(p => p.round++);
-        if (room[0].round > 10) {
-            const winner = room.reduce((a, b) => (a.score > b.score ? a : b));
-            io.to(roomId).emit('gameOver', winner);
-            delete rooms[roomId];
+        if (room.timeLeft <= 0) {
+            clearInterval(room.timer);
+            endRound(roomId);
         }
-    }, 20000);
+    }, 1000);
+}
+
+function endRound(roomId) {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    const results = room.players.map(p => ({
+        nickname: p.nickname,
+        answer: room.answers[p.id] || '-',
+        correct: room.answers[p.id] ? room.currentQuestion.a.includes(room.answers[p.id].toLowerCase()) : false
+    }));
+
+    results.forEach(r => {
+        if (r.correct) {
+            const player = room.players.find(p => p.nickname === r.nickname);
+            if (player) player.score += r.answer.length;
+        }
+    });
+
+    io.to(roomId).emit('roundOver', results);
+
+    room.round++;
+    if (room.round > 10) {
+        const winner = room.players.reduce((a, b) => (a.score > b.score ? a : b));
+        io.to(roomId).emit('gameOver', winner);
+        if (room.timer) clearInterval(room.timer);
+        delete rooms[roomId];
+    } else {
+        startRound(roomId); // запускаем следующий раунд автоматически
+    }
 }
 
 const PORT = process.env.PORT || 3000;
