@@ -79,12 +79,8 @@ ws.onmessage = (msg) => {
 
   // Результат ответа
   if (data.type === 'answerResult') {
-    if (data.correct) {
-      answerInput.className = 'correct';
-      answerInput.disabled = true;
-    } else {
-      answerInput.className = 'wrong';
-    }
+    answerInput.className = data.correct ? 'correct' : 'wrong';
+    if (data.correct) answerInput.disabled = true;
   }
 
   // Конец раунда
