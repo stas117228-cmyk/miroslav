@@ -1,12 +1,13 @@
-import express from "express";
-import { WebSocketServer } from "ws";
-import { allQuestions } from "./questions.js";
+import express from 'express';
+import { WebSocketServer } from 'ws';
+import { allQuestions } from './questions.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(express.static("."));
 
+app.use(express.static("."));
 const server = app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
 const wss = new WebSocketServer({ server });
 
 let players = [];
@@ -31,10 +32,7 @@ wss.on("connection", ws => {
     }
 
     if (data.type === "start") {
-      // Выбираем случайные 10 вопросов
-      questions = allQuestions
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 10);
+      questions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 10);
       currentIndex = 0;
       startRound();
     }
@@ -62,7 +60,7 @@ wss.on("connection", ws => {
 
 function startRound() {
   players.forEach(p => { p.answered = false; p.answer = ""; });
-  broadcast({ type: "newQuestion", question: questions[currentIndex].question });
+  broadcast({ type: "newQuestion", question: questions[currentIndex] });
 
   let timeLeft = roundTime;
   roundTimer = setInterval(() => {
