@@ -10,7 +10,5 @@
   "dependencies": {
     "express": "^4.18.2",
     "ws": "^8.15.0"
-  },
-  "author": "YourName",
-  "license": "MIT"
+  }
 }
