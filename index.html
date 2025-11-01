@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Content Security Policy с разрешением inline-скриптов -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-        img-src 'self' https:;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        font-src 'self' https://fonts.gstatic.com;
-    ">
-
-    <meta charset="UTF-8">
-    <title>Онлайн Викторина</title>
-    <link rel="stylesheet" href="style.css">
+<meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    img-src 'self' https:;
+    style-src 'self' 'unsafe-inline';
+    font-src 'self';
+">
+<meta charset="UTF-8">
+<title>Викторина Онлайн</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
@@ -29,8 +27,6 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const socket = io();
-
 document.getElementById('joinBtn').onclick = () => {
     const nickname = document.getElementById('nickname').value.trim();
     const roomId = document.getElementById('roomId').value.trim();
