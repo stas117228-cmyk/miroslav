@@ -31,18 +31,23 @@ const roomId = localStorage.getItem('roomId');
 socket.emit('joinRoom', { nickname, roomId });
 
 socket.on('roomFull', () => alert('Комната заполнена'));
+
 socket.on('updatePlayers', players => {
     document.getElementById('players').innerText = 'Игроки: ' + players.join(', ');
 });
+
 socket.on('timer', time => {
     document.getElementById('timer').innerText = Осталось: ${time}s;
 });
+
 socket.on('newQuestion', ({ round, question }) => {
     document.getElementById('question').innerText = Раунд ${round}: ${question};
     document.getElementById('answer').value = '';
 });
+
 socket.on('wrongAnswer', () => alert('Неправильный ответ! Попробуйте снова.'));
 socket.on('correctAnswer', () => alert('Правильный ответ!'));
+
 socket.on('roundOver', results => {
     let text = 'Раунд завершён! Ответы игроков:\n';
     results.forEach(r => {
@@ -50,6 +55,7 @@ socket.on('roundOver', results => {
     });
     alert(text);
 });
+
 socket.on('gameOver', winner => {
     alert('Игра окончена! Победитель: ' + winner.nickname + ' с ' + winner.score + ' букв.');
     window.location.href = '/';
