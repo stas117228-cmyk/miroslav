@@ -18,11 +18,7 @@ function createChart(players) {
                 backgroundColor: 'purple'
             }]
         },
-        options: {
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-        }
+        options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
     });
 }
 
@@ -37,20 +33,37 @@ function updateChart(players) {
 }
 
 socket.on('roomFull', () => alert('Комната заполнена'));
-socket.on('updatePlayers', players => document.getElementById('players').innerText = 'Игроки: ' + players.join(', '));
-socket.on('timer', time => document.getElementById('timer').innerText = `Осталось: ${time}s`);
+
+socket.on('updatePlayers', players => {
+    document.getElementById('players').innerText = 'Игроки: ' + players.join(', ');
+});
+
+socket.on('timer', time => {
+    document.getElementById('timer').innerText = Осталось: ${time}s;
+});
+
 socket.on('newQuestion', ({ round, question }) => {
     document.getElementById('question').innerText = Раунд ${round}: ${question};
     document.getElementById('answer').value = '';
 });
+
 socket.on('wrongAnswer', () => alert('Неправильный ответ! Попробуйте снова.'));
 socket.on('correctAnswer', () => alert('Правильный ответ!'));
+
 socket.on('roundOver', results => {
     let text = 'Раунд завершён! Ответы игроков:\n';
     results.forEach(r => text += `${r.nickname}: ${r.answer} ${r.correct?'(правильно)':'(неправильно)'}\n`);
     alert(text);
+    document.getElementById('nextRoundBtn').style.display = 'inline-block';
 });
+
+document.getElementById('nextRoundBtn').onclick = () => {
+    document.getElementById('nextRoundBtn').style.display = 'none';
+    socket.emit('nextRound', { roomId });
+};
+
 socket.on('updateScores', players => updateChart(players));
+
 socket.on('gameOver', winner => {
     alert('Игра окончена! Победитель: ' + winner.nickname + ' с ' + winner.score + ' букв.');
     window.location.href = '/';
