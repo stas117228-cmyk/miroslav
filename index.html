@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Content Security Policy -->
+    <!-- Content Security Policy с разрешением inline-скриптов -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
         img-src 'self' https:;
-        script-src 'self' https://cdn.jsdelivr.net;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
     ">
-    
+
     <meta charset="UTF-8">
     <title>Онлайн Викторина</title>
     <link rel="stylesheet" href="style.css">
@@ -18,7 +18,6 @@
 <div class="container">
     <h1>Викторина Онлайн</h1>
 
-    <!-- Добавлены name и id для автозаполнения -->
     <label for="nickname">Ник:</label>
     <input type="text" id="nickname" name="nickname" placeholder="Введите ник">
 
@@ -35,11 +34,14 @@ const socket = io();
 document.getElementById('joinBtn').onclick = () => {
     const nickname = document.getElementById('nickname').value.trim();
     const roomId = document.getElementById('roomId').value.trim();
-    if(!nickname || !roomId) return alert('Введите ник и комнату');
+
+    if (!nickname || !roomId) return alert('Введите ник и комнату');
+
     localStorage.setItem('nickname', nickname);
     localStorage.setItem('roomId', roomId);
+
     window.location.href = 'game.html';
-}
+};
 </script>
 </body>
 </html>
