@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Игра</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Викторина</h1>
+    <div id="players"></div>
+    <div id="question"></div>
+    <input type="text" id="answer" placeholder="Ваш ответ">
+    <button id="sendBtn">Ответить</button>
+    <button id="nextBtn">Следующий раунд</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const nickname = localStorage.getItem('nickname');
+const roomId = localStorage.getItem('roomId');
+
+socket.emit('joinRoom', { nickname, roomId });
+
+socket.on('roomFull', () => alert('Комната заполнена'));
+
+socket.on('updatePlayers', (players) => {
+    document.getElementById('players').innerHTML = 'Игроки: ' + players.join(', ');
+});
+
+socket.on('newQuestion', ({ round, question }) => {
+    document.getElementById('question').innerHTML = Раунд ${round}: ${question};
+});
+
+document.getElementById('sendBtn').onclick = () => {
+    const answer = document.getElementById('answer').value.trim();
+    if(!answer) return;
+    socket.emit('answer', { roomId, answer });
+    document.getElementById('answer').value = '';
+};
+
+document.getElementById('nextBtn').onclick = () => {
+    socket.emit('nextRound', roomId);
+};
+
+socket.on('gameOver', (winner) => {
+    alert(`Игра окончена! Победитель: ${winner.nickname} с ${winner.score} букв.`);
+    window.location.href = '/';
+});
+</script>
+</body>
+</html>
