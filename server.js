@@ -2,77 +2,92 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const path = require('path');
 
-const PORT = process.env.PORT || 3000;
+// Раздача статических файлов из public/
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(express.static('public'));
+// Главная страница
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
-let rooms = {}; // { roomId: { players: {}, round: 0, questions: [] } }
-let questions = require('./questions.json');
+// Сокеты для игры
+const rooms = {};
 
 io.on('connection', (socket) => {
-    console.log('New connection:', socket.id);
+    console.log('New user connected');
 
-    socket.on('joinRoom', ({ roomId, nickname }) => {
-        if (!rooms[roomId]) {
-            rooms[roomId] = { players: {}, round: 0, questions: shuffle(questions).slice(0,10) };
-        }
-        if (Object.keys(rooms[roomId].players).length >= 6) {
+    socket.on('joinRoom', ({ nickname, roomId }) => {
+        if (!rooms[roomId]) rooms[roomId] = [];
+        if (rooms[roomId].length >= 6) {
             socket.emit('roomFull');
             return;
         }
 
-        rooms[roomId].players[socket.id] = { nickname, score: 0 };
+        rooms[roomId].push({ id: socket.id, nickname, score: 0 });
         socket.join(roomId);
 
-        io.to(roomId).emit('updatePlayers', Object.values(rooms[roomId].players).map(p => p.nickname));
-        if (Object.keys(rooms[roomId].players).length >= 1) {
-            startRound(roomId);
-        }
+        const players = rooms[roomId].map(p => p.nickname);
+        io.to(roomId).emit('updatePlayers', players);
+
+        socket.emit('newQuestion', { round: 1, question: getRandomQuestion() });
     });
 
     socket.on('answer', ({ roomId, answer }) => {
-        const room = rooms[roomId];
-        if (!room) return;
-        const currentQuestion = room.questions[room.round];
-        if (currentQuestion) {
-            room.players[socket.id].score += answer.length;
-        }
+        const player = rooms[roomId]?.find(p => p.id === socket.id);
+        if (player) player.score += answer.length;
     });
 
     socket.on('nextRound', (roomId) => {
         const room = rooms[roomId];
         if (!room) return;
-        room.round++;
-        if (room.round >= room.questions.length) {
-            // Игра закончена
-            const winner = Object.values(room.players).reduce((a,b) => a.score >= b.score ? a : b);
+        const round = room[0]?.round ? room[0].round + 1 : 2;
+
+        if (round > 10) {
+            const winner = room.reduce((a, b) => (a.score > b.score ? a : b));
             io.to(roomId).emit('gameOver', winner);
             delete rooms[roomId];
         } else {
-            startRound(roomId);
+            room.forEach(p => p.round = round);
+            io.to(roomId).emit('newQuestion', { round, question: getRandomQuestion() });
         }
     });
 
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
-            if (rooms[roomId].players[socket.id]) {
-                delete rooms[roomId].players[socket.id];
-                io.to(roomId).emit('updatePlayers', Object.values(rooms[roomId].players).map(p => p.nickname));
-            }
+            rooms[roomId] = rooms[roomId].filter(p => p.id !== socket.id);
         }
     });
 });
 
-function startRound(roomId) {
-    const room = rooms[roomId];
-    if (!room) return;
-    const question = room.questions[room.round];
-    io.to(roomId).emit('newQuestion', { round: room.round+1, question: question.q });
+// Пример вопросов
+const questions = [
+    { q: "Какое животное считается самым ленивым на планете?" },
+    { q: "Если у тебя есть три яблока и ты забираешь два, сколько у тебя яблок?" },
+    { q: "Какая планета названа в честь римского бога войны?" },
+    { q: "Что можно поймать, но нельзя бросить?" },
+    { q: "Какая страна известна своими кленовыми листьями?" },
+    { q: "Что всегда идёт, но никогда не приходит?" },
+    { q: "Какой океан самый большой на Земле?" },
+    { q: "Что становится мокрым, когда сушит?" },
+    { q: "Сколько месяцев имеют 28 дней?" },
+    { q: "Какая птица не умеет летать?" },
+    { q: "Что можно увидеть с закрытыми глазами?" },
+    { q: "Какой фрукт на английском называется 'grape'?" },
+    { q: "Что тяжелее: килограмм пуха или килограмм камней?" },
+    { q: "Какой элемент в таблице Менделеева обозначается символом 'O'?" },
+    { q: "Что растёт вниз, но не вверх?" },
+    { q: "Какая страна подарила статую Свободы США?" },
+    { q: "Что всегда перед тобой, но ты никогда не видишь?" },
+    { q: "Какой месяц имеет наименьшее количество дней?" },
+    { q: "Какой газ мы вдыхаем, чтобы жить?" },
+    { q: "Что можно сломать, не касаясь руками?" }
+];
+
+function getRandomQuestion() {
+    return questions[Math.floor(Math.random() * questions.length)].q;
 }
 
-function shuffle(array) {
-    return array.sort(() => Math.random() - 0.5);
-}
-
+const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => console.log(`Server running on port ${PORT}`));
