@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Онлайн Викторина</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Викторина Онлайн</h1>
+    <input type="text" id="nickname" placeholder="Введите ник">
+    <input type="text" id="roomId" placeholder="Введите комнату">
+    <button id="joinBtn">Войти</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+document.getElementById('joinBtn').onclick = () => {
+    const nickname = document.getElementById('nickname').value.trim();
+    const roomId = document.getElementById('roomId').value.trim();
+    if(!nickname || !roomId) return alert('Введите ник и комнату');
+    localStorage.setItem('nickname', nickname);
+    localStorage.setItem('roomId', roomId);
+    window.location.href = 'game.html';
+}
+</script>
+</body>
+</html>
