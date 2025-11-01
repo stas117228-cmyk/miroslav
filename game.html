@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Content Security Policy -->
+    <!-- Content Security Policy с разрешением inline-скриптов -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
         img-src 'self' https:;
-        script-src 'self' https://cdn.jsdelivr.net;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
     ">
@@ -20,7 +20,6 @@
     <div id="players"></div>
     <div id="question"></div>
 
-    <!-- Добавлены id и name -->
     <label for="answer">Ваш ответ:</label>
     <input type="text" id="answer" name="answer" placeholder="Ваш ответ">
 
