@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Слова - Викторина</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="login">
+  <h1>Слова</h1>
+  <input type="text" id="nickInput" placeholder="Введите ник">
+  <button id="joinBtn">Войти</button>
+</div>
+
+<div id="lobby" style="display:none;">
+  <h1>Лобби</h1>
+  <div id="playerList"></div>
+  <button id="startBtn">Начать игру</button>
+</div>
+
+<div id="game" style="display:none;">
+  <div id="timer">30</div>
+  <div id="question">Вопрос</div>
+  <input type="text" id="answerInput" placeholder="Введите ответ">
+  <div id="leaders"></div>
+</div>
+
+<div id="results" style="display:none;">
+  <h1>Итоги игры</h1>
+  <div id="finalResults"></div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
