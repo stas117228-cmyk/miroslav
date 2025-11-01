@@ -44,20 +44,24 @@ answerInput.addEventListener('keydown', (e) => {
 ws.onmessage = (msg) => {
   const data = JSON.parse(msg.data);
 
+  // Лобби
   if (data.type === 'lobby') {
     playerList.innerHTML = data.players.map(p => `<div>${p}</div>`).join('');
   }
 
+  // Новый вопрос
   if (data.type === 'newQuestion') {
     lobbyDiv.style.display = 'none';
     gameDiv.style.display = 'flex';
     questionEl.textContent = data.question.text || data.question;
+
     if (data.question.image) {
       questionImage.src = images/${data.question.image};
       questionImage.style.display = 'block';
     } else {
       questionImage.style.display = 'none';
     }
+
     answerInput.value = '';
     answerInput.disabled = false;
     answerInput.className = '';
@@ -67,11 +71,13 @@ ws.onmessage = (msg) => {
     timerEl.textContent = timeLeft;
   }
 
+  // Таймер
   if (data.type === 'timer') {
     timeLeft = data.timeLeft;
     timerEl.textContent = timeLeft;
   }
 
+  // Результат ответа
   if (data.type === 'answerResult') {
     if (data.correct) {
       answerInput.className = 'correct';
@@ -81,12 +87,14 @@ ws.onmessage = (msg) => {
     }
   }
 
+  // Конец раунда
   if (data.type === 'roundEnd') {
     leadersEl.innerHTML = data.answers
       .map(p => `<div>${p.nick}: ${p.score} букв — ${p.answer || '-'}</div>`)
       .join('');
   }
 
+  // Конец игры
   if (data.type === 'gameEnd') {
     gameDiv.style.display = 'none';
     resultsDiv.style.display = 'flex';
