@@ -4,19 +4,19 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const path = require('path');
 
-// Раздача статических файлов из public/
-app.use(express.static(path.join(__dirname, 'public')));
+// Раздача статики прямо из корня репозитория
+app.use(express.static(__dirname));
 
 // Главная страница
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Сокеты для игры
+// Сокеты для игры (пример)
 const rooms = {};
 
 io.on('connection', (socket) => {
-    console.log('New user connected');
+    console.log('Новый игрок подключился');
 
     socket.on('joinRoom', ({ nickname, roomId }) => {
         if (!rooms[roomId]) rooms[roomId] = [];
@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Пример вопросов
+// Вопросы
 const questions = [
     { q: "Какое животное считается самым ленивым на планете?" },
     { q: "Если у тебя есть три яблока и ты забираешь два, сколько у тебя яблок?" },
@@ -90,4 +90,4 @@ function getRandomQuestion() {
 }
 
 const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+http.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
